@@ -166,7 +166,10 @@ describe AmplitudeAPI do
             user_properties: {
               first_name: "John",
               last_name: "Doe"
-            }
+            },
+            country: 'GB',
+            region: 'Sussex',
+            city: 'Lewes',
           )
           body = {
             api_key: described_class.api_key,
@@ -350,64 +353,91 @@ describe AmplitudeAPI do
   end
 
   describe ".send_identify" do
+    before do
+      allow(described_class).to receive(:identify)
+      described_class.send_identify(user_id: user, device_id: device_id, user_properties: { first_name: "John", last_name: "Doe" }, country: 'GB', region: 'Sussex', city: 'Lewes')
+    end
+
     context "with no device_id" do
-      it "sends an identify to AmplitudeAPI" do
-        identification = AmplitudeAPI::Identification.new(
+      let(:device_id) { nil }
+      let(:identification) do
+        AmplitudeAPI::Identification.new(
           user_id: user,
           user_properties: {
             first_name: "John",
             last_name: "Doe"
-          }
+          },
+          country: 'GB',
+          region: 'Sussex',
+          city: 'Lewes',
         )
-        expect(described_class).to receive(:identify).with(identification)
+      end
 
-        described_class.send_identify(user, nil, first_name: "John", last_name: "Doe")
+      it "sends an identify to AmplitudeAPI" do
+        expect(described_class).to have_received(:identify).with(identification)
       end
 
       context "the user is nil" do
-        it "sends an identify with the no account user" do
-          identification = AmplitudeAPI::Identification.new(
-            user_id: nil,
+        let(:identification) do
+          AmplitudeAPI::Identification.new(
+            user_id: AmplitudeAPI::USER_WITH_NO_ACCOUNT,
             user_properties: {
               first_name: "John",
               last_name: "Doe"
-            }
+            },
+            country: 'GB',
+            region: 'Sussex',
+            city: 'Lewes',
           )
-          expect(described_class).to receive(:identify).with(identification)
+        end
 
-          described_class.send_identify(nil, nil, first_name: "John", last_name: "Doe")
+        let(:user) { nil }
+
+        it "sends an identify with the no account user" do
+          expect(described_class).to have_received(:identify).with(identification)
         end
       end
 
       context "the user is a user_id" do
-        it "sends an identify to AmplitudeAPI" do
-          identification = AmplitudeAPI::Identification.new(
+        let(:identification) do
+          AmplitudeAPI::Identification.new(
             user_id: 123,
             user_properties: {
               first_name: "John",
               last_name: "Doe"
-            }
+            },
+            country: 'GB',
+            region: 'Sussex',
+            city: 'Lewes',
           )
-          expect(described_class).to receive(:identify).with(identification)
+        end
 
-          described_class.send_identify(user.id, nil, first_name: "John", last_name: "Doe")
+        it "sends an identify to AmplitudeAPI" do
+          expect(described_class).to have_received(:identify).with(identification)
         end
       end
     end
 
     context "with a device_id" do
-      it "sends an identify to AmplitudeAPI" do
+      let(:identification) do
         identification = AmplitudeAPI::Identification.new(
           user_id: user,
           device_id: "abc",
           user_properties: {
             first_name: "John",
             last_name: "Doe"
-          }
-        )
-        expect(described_class).to receive(:identify).with(identification)
+          },
+          country: 'GB',
+          region: 'Sussex',
+          city: 'Lewes',
 
-        described_class.send_identify(user, "abc", first_name: "John", last_name: "Doe")
+
+        )
+      end
+      let(:device_id) { "abc" }
+
+      it "sends an identify to AmplitudeAPI" do
+        expect(described_class).to have_received(:identify).with(identification)
       end
     end
   end
